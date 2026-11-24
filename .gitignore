@@ -1,0 +1,8 @@
+.venv/
+.pyi-work/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+build/lib/
+build/bdist.*/
