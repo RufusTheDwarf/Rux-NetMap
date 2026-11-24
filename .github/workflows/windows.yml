@@ -1,0 +1,39 @@
+# RUX · Onlyrutsuu
+name: Build RUX Windows x64
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          architecture: x64
+      - name: Build and smoke-test RUX
+        shell: cmd
+        run: Build-RUX.cmd
+      - name: Check Windows file properties
+        shell: pwsh
+        run: |
+          $info = (Get-Item 'dist/RUX.exe').VersionInfo
+          if ($info.CompanyName -ne 'Onlyrutsuu' -or $info.ProductName -ne 'RUX') {
+            throw 'Unexpected Windows version resource'
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RUX-Windows-x64
+          path: |
+            dist/RUX.exe
+            dist/RUX.exe.sha256
+            .pyi-work/self-test.json
+          include-hidden-files: true
+          if-no-files-found: error
