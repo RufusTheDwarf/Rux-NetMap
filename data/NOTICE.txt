@@ -1,0 +1,37 @@
+RUX 1.0.0
+Auteur du logiciel et de son icône : Onlyrutsuu, 2026.
+Licence du dépôt : MIT. Le fichier LICENSE conserve la mention initiale de Rufus.
+
+Registre hors ligne des préfixes MAC
+Les 51 805 associations préfixe/organisation proviennent des registres publics
+IEEE MA-L (24 bits), MA-M (28 bits) et MA-S (36 bits), via le fichier
+hwdb.d/20-OUI.hwdb du projet systemd. Le CSV conserve les noms et les préfixes.
+Date du fichier d’entrée fourni par la distribution : 13 mars 2026 (mtime).
+SHA-256 du fichier source : fc4adb6bf3bf14bd4451e65f07fd441446820ab3fbc93df3359aeb79169a7802
+SHA-256 du CSV (fins de ligne LF) : de42f1d8c4d36527ad7b201194b9322052f9da06f46ded5e4e6e7d79a0eddd20
+IEEE ne revendique pas de copyright sur son annuaire OUI public et n’en
+restreint pas la distribution, selon la notice reproduite par Debian.
+Sources :
+https://standards.ieee.org/products-programs/regauth/
+https://github.com/systemd/systemd/blob/main/hwdb.d/20-OUI.hwdb
+https://sources.debian.org/src/ieee-data/20240722/debian/copyright/
+La licence générale de systemd est LGPL-2.1-or-later (texte dans licenses/).
+
+Composants tiers
+Qt for Python (PySide6 Essentials et Shiboken6) : The Qt Company et contributeurs.
+Cette application utilise notamment Qt Core, Gui et Widgets. Le code source
+du projet RUX et sa spécification de build permettent de reconstruire le
+programme avec une distribution Qt compatible.
+https://doc.qt.io/qtforpython-6/licenses.html
+https://download.qt.io/official_releases/QtForPython/
+https://download.qt.io/official_releases/qt/
+Les textes LGPL-3.0 et GPL-3.0 sont inclus dans licenses/. Le build ajoute
+les notices disponibles dans les distributions Python sous data/distributions/.
+
+CPython : Python Software Foundation et contributeurs.
+https://docs.python.org/3/license.html
+PyInstaller : équipes PyInstaller, licence GPL avec exception pour le bootloader.
+https://pyinstaller.org/en/stable/license.html
+
+La mention Onlyrutsuu identifie l’auteur de RUX. L’état de la signature
+Authenticode du binaire se vérifie dans Windows avec Get-AuthenticodeSignature.
