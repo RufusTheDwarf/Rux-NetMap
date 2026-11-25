@@ -13,6 +13,7 @@ from core import config
 from core.scope import Consent, ScopeError, plan_scan, suggested
 from gui.device_table import DeviceFilter, DeviceTable
 from gui.dialogs import About, ConfirmDialog
+from gui.network_map import NetworkMap
 from gui.worker import ScanWorker
 from skills.journal import open_journal, skill_logging
 
@@ -48,7 +49,7 @@ class MainWindow(QMainWindow):
         nav.addSpacing(16)
         self.pages = QStackedWidget()
         self.nav_group = QButtonGroup(self)
-        for i, title in enumerate(("Inventaire", "Journal", "À propos")):
+        for i, title in enumerate(("Inventaire", "Carte du réseau", "Journal", "À propos")):
             btn = QPushButton(title)
             btn.setObjectName("nav")
             btn.setCheckable(True)
@@ -64,6 +65,9 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.pages, 1)
 
         self.pages.addWidget(self._inventory_page())
+        self.network_map = NetworkMap()
+        self.network_map.device_requested.connect(self._show_device)
+        self.pages.addWidget(self.network_map)
         logs = QWidget()
         logbox = QVBoxLayout(logs)
         logbox.setContentsMargins(20, 16, 20, 16)
@@ -184,6 +188,24 @@ class MainWindow(QMainWindow):
         body.addWidget(self.table, 1)
         return page
 
+    @Slot(object)
+    def _show_device(self, ip):
+        for row, (device, _) in enumerate(self.model.rows):
+            if device.ip != ip:
+                continue
+            source = self.model.index(row, 0)
+            index = self.proxy.mapFromSource(source)
+            if not index.isValid():
+                self.search.clear()
+                index = self.proxy.mapFromSource(source)
+            self.nav_group.button(0).setChecked(True)
+            self.pages.setCurrentIndex(0)
+            self.table.setCurrentIndex(index)
+            self.table.selectRow(index.row())
+            self.table.scrollTo(index)
+            self.table.setFocus()
+            return
+
     def refresh_adapters(self):
         if self.worker is not None:
             return
@@ -236,6 +258,7 @@ class MainWindow(QMainWindow):
             return
         self.snapshot = None
         self.model.reset_scan(bool(plan.ports))
+        self.network_map.set_plan(plan)
         self.search.clear()
         self.bar.setRange(0, len(plan.targets))
         self.bar.setValue(0)
@@ -247,6 +270,7 @@ class MainWindow(QMainWindow):
         self.worker = ScanWorker(Consent(plan, accepted=True), self.backend, self.directory, self.logger, self)
         queued = Qt.ConnectionType.QueuedConnection
         self.worker.device.connect(self.model.add, queued)
+        self.worker.device.connect(self.network_map.observe, queued)
         self.worker.progress.connect(self._progress, queued)
         self.worker.result.connect(self._result, queued)
         self.worker.failure.connect(self._failed, queued)
@@ -270,6 +294,7 @@ class MainWindow(QMainWindow):
         self.bar.setValue(done)
         self.summary.setText(f"{self.active_cidr}   ·   {done} / {total} adresses traitées"
                              f"   ·   {self.model.rowCount()} appareil(s) observé(s)")
+        self.network_map.status.setText(self.summary.text())
 
     @Slot(object)
     def _result(self, snapshot):
@@ -282,12 +307,14 @@ class MainWindow(QMainWindow):
         if snapshot.notices:
             summary += "   ·   Voir le journal"
         self.summary.setText(summary)
+        self.network_map.status.setText(summary)
         self.statusBar().showMessage(labels[snapshot.status])
         self.export_btn.setEnabled(True)
 
     @Slot(str)
     def _failed(self, message):
         self.summary.setText(f"Échec du scan. {message}")
+        self.network_map.status.setText(self.summary.text())
         self.statusBar().showMessage("Échec · voir le journal")
 
     @Slot()
