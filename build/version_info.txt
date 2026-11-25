@@ -1,18 +1,18 @@
 # UTF-8 · RUX · Onlyrutsuu
 VSVersionInfo(
-  ffi=FixedFileInfo(filevers=(1, 0, 0, 0), prodvers=(1, 0, 0, 0),
+  ffi=FixedFileInfo(filevers=(1, 1, 0, 0), prodvers=(1, 1, 0, 0),
                     mask=0x3f, flags=0x0, OS=0x40004, fileType=1, subtype=0, date=(0, 0)),
   kids=[
     StringFileInfo([StringTable("040c04b0", [
       StringStruct("CompanyName", "Onlyrutsuu"),
       StringStruct("Author", "Onlyrutsuu"),
       StringStruct("FileDescription", "RUX · Inventaire réseau local"),
-      StringStruct("FileVersion", "1.0.0.0"),
+      StringStruct("FileVersion", "1.1.0.0"),
       StringStruct("InternalName", "RUX"),
       StringStruct("LegalCopyright", "© 2026 Onlyrutsuu"),
       StringStruct("OriginalFilename", "RUX.exe"),
       StringStruct("ProductName", "RUX"),
-      StringStruct("ProductVersion", "1.0.0")
+      StringStruct("ProductVersion", "1.1.0")
     ])]),
     VarFileInfo([VarStruct("Translation", [1036, 1200])])
   ]

@@ -21,6 +21,8 @@ QPushButton:disabled, QPushButton#primary:disabled { color: #63747c; background:
 QPushButton:focus, QComboBox:focus, QLineEdit:focus, QSpinBox:focus { border: 2px solid #077b94; }
 QPushButton#nav:focus { border: 1px solid #b2e7ed; }
 QTableView { alternate-background-color: #f1f6f8; selection-background-color: #c4e4e3; selection-color: #143e45; }
+QListWidget#addressGrid { background: white; border: 1px solid #c7d4dc; padding: 6px; }
+QListWidget#addressGrid::item:selected { background: #18566b; color: white; }
 QHeaderView::section { background: #e6edef; color: #344d5a; border: none; border-right: 1px solid #cfdbdf; padding: 7px 5px; }
 QProgressBar { background: #dce6e8; border: none; border-radius: 2px; }
 QProgressBar::chunk { background: #007a6d; border-radius: 2px; }

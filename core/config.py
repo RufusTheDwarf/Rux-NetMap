@@ -4,7 +4,7 @@ from pathlib import Path
 
 APP = "RUX"
 AUTHOR = "Onlyrutsuu"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 MAX_ADDRESSES = 256
 MAX_WORKERS = 8
 TIMEOUT_MS = 650

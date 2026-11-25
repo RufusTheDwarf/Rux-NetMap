@@ -1,197 +1,174 @@
-# Rux-Terminal
+<!-- RUX NetMap · Onlyrutsuu -->
+<p align="center"><img src="docs/images/header.svg" width="100%" alt="RUX NetMap · Inventaire IPv4 du réseau local" /></p>
 
-**RUX · Inventaire du réseau local pour Windows x64 · version 1.0.0 · Onlyrutsuu**
+<p align="center">
+  <strong><a href="https://github.com/RufusTheDwarf/Rux-NetMap/releases/latest/download/RUX.exe">Télécharger RUX.exe pour Windows x64</a></strong>
+  &nbsp;·&nbsp; <a href="https://github.com/RufusTheDwarf/Rux-NetMap/releases/latest/download/RUX.exe.sha256">SHA-256</a>
+  &nbsp;·&nbsp; <a href="https://github.com/RufusTheDwarf/Rux-NetMap/releases">Toutes les versions</a>
+</p>
 
-Le dépôt utilise la [licence MIT](LICENSE). Les attributions des composants tiers figurent dans [data/NOTICE.txt](data/NOTICE.txt).
+<p align="center">
+  <a href="https://github.com/RufusTheDwarf/Rux-NetMap/releases"><img alt="Dernière version publique" src="https://img.shields.io/github/v/release/RufusTheDwarf/Rux-NetMap?label=version&amp;color=14675e&amp;style=flat" /></a>
+  <a href="https://github.com/RufusTheDwarf/Rux-NetMap/actions/workflows/windows.yml"><img alt="État du build Windows" src="https://github.com/RufusTheDwarf/Rux-NetMap/actions/workflows/windows.yml/badge.svg?branch=main" /></a>
+  <a href="LICENSE"><img alt="Licence MIT du projet" src="https://img.shields.io/badge/licence-MIT-315163?style=flat" /></a>
+</p>
 
-RUX affiche les appareils observés sur un segment IPv4 privé. Il est conçu pour un compte standard, avec une interface en français et un registre de fabricants hors ligne.
+RUX montre quels appareils répondent sur ton réseau local. Choisis l’interface Ethernet ou Wi-Fi, confirme la plage IPv4, puis consulte les résultats sur une carte ou dans une table exportable. L’application fonctionne avec un compte Windows standard et embarque Python, Qt et son registre de fabricants.
 
-<h2 align="center">Démarrage // Utiliser RUX.exe</h2>
+<p align="center">
+  <a href="#demarrage">Premier scan</a> · <a href="#carte">Carte</a> · <a href="#exports">Exports</a> · <a href="#build">Build Windows</a> · <a href="#depannage">Dépannage</a> · <a href="docs/TECHNIQUE.md">Référence technique</a>
+</p>
 
-1. Extrais l’archive dans un dossier où ton compte peut écrire. Ouvre **RUX.exe**.
-2. Choisis la carte reliée au LAN. Sur un poste avec Wi-Fi, Ethernet et VMware, vérifie le nom de la carte et son IPv4. Le préfixe réel apparaît à côté de l’adresse.
-3. Vérifie la plage proposée. Sur `10.30.45.6/16`, par exemple, RUX propose `10.30.45.0/24`. Tu peux choisir une autre tranche de ce LAN. Un `/24` représente 256 adresses et, sur un réseau classique, 254 cibles hôtes.
-4. Laisse les options par défaut pour commencer. Clique sur **Lancer le scan**, relis le récapitulatif, coche l’autorisation et confirme. Tu peux annuler à tout moment.
-5. Clique sur les en-têtes pour trier. Le champ de recherche filtre toutes les colonnes. **Exporter** enregistre l’inventaire entier du scan affiché. Le filtre visuel reste indépendant de l’export.
-6. Ouvre **Journal** pour consulter les erreurs, les permissions manquantes et les résultats partiels.
+<a id="demarrage"></a>
+<h2 align="center">Démarrage // Ton premier scan</h2>
 
-L’exécutable embarque Python, Qt et le registre OUI. Un scan nécessite une carte Ethernet, Wi-Fi ou un agrégat Ethernet actif avec une IPv4 RFC 1918. Cible de recette : Windows 10 22H2 et Windows 11 x64.
+1. Sous Windows 10 ou 11 x64, télécharge **RUX.exe** en haut de cette page et ouvre-le. Le même fichier se trouve dans **Releases → Assets → RUX.exe**.
+2. Dans **Inventaire**, choisis la carte reliée au réseau à inventorier. Si tu utilises une VM, vérifie le nom de la carte et son adresse IPv4.
+3. Vérifie le CIDR. Par exemple, pour tester une petite partie de `192.168.1.0/24`, entre `192.168.1.0/28`. Cette tranche couvre les hôtes `.1` à `.14`.
+4. Clique sur **Lancer le scan**. Le dialogue indique l’interface, la plage, le délai et les méthodes. Confirme uniquement si tu es autorisé à inventorier ce réseau.
+5. Suis la progression dans **Inventaire** ou **Carte du réseau**. **Annuler** conserve les observations déjà obtenues. **Journal** donne le détail d’un résultat partiel.
 
-<h2 align="center">Vérification // Auteur et intégrité du fichier</h2>
+<a id="carte"></a>
+<h2 align="center">Carte // Retrouver un appareil</h2>
 
-**Onlyrutsuu** figure dans les en-têtes du code RUX, les métadonnées Python, l’écran **À propos**, les exports JSON et la ressource de version Windows. Dans les propriétés du fichier, ouvre l’onglet **Détails**. Le binaire fourni porte ces crédits d’auteur et est distribué sans certificat Authenticode.
+Chaque case représente une adresse de la plage confirmée. Le nombre affiché est le dernier octet de l’IPv4. Un point plein indique une réponse ou la présence du poste local. Une case sans observation peut appartenir à un appareil silencieux ou à une adresse que le scan n’a pas encore traitée.
 
-Dans PowerShell, depuis le dossier contenant l’exécutable :
+Sélectionne une case pour lire l’IP complète et les informations disponibles. **Voir dans l’inventaire** sélectionne l’appareil dans la table, même si un filtre le masquait. Ouvrir la carte ne déclenche aucune requête réseau supplémentaire.
 
-```powershell
-(Get-Item .\RUX.exe).VersionInfo | Select-Object CompanyName, FileDescription, ProductVersion, LegalCopyright
-(Get-AuthenticodeSignature .\RUX.exe).Status
-$attendu = ((Get-Content .\RUX.exe.sha256 -Raw).Trim() -split '\s+')[0]
-(Get-FileHash .\RUX.exe -Algorithm SHA256).Hash -eq $attendu
-```
+<p align="center"><img src="docs/images/carte.svg" width="900" alt="Fenêtre de RUX 1.1.0 en français. Sept appareils sont observés dans la plage 192.168.42.0/26. La case de l’appareil 192.168.42.10 est sélectionnée." /></p>
+<p align="center"><em>Interface réelle de RUX 1.1.0 avec les données d’un réseau de démonstration.</em></p>
 
-Le dernier contrôle doit afficher `True`. L’empreinte permet de détecter une différence avec le binaire livré. Pour contrôler le démarrage, Qt, SQLite, les ressources et l’énumération locale des cartes sans envoyer de sonde :
+<a id="exports"></a>
+<h2 align="center">Inventaire // Lire et exporter les résultats</h2>
 
-```powershell
-$p = Start-Process .\RUX.exe -ArgumentList '--self-test','rux-verification.json' -Wait -PassThru
-$p.ExitCode
-Get-Content .\rux-verification.json
-```
+| Information | Comment RUX l’obtient |
+| :--- | :--- |
+| IP, méthode, MAC | Le poste local est identifié directement. Pour les autres cibles, RUX essaie ARP puis ICMP. La MAC apparaît si elle est disponible. |
+| Nom DNS, fabricant présumé | Cache DNS ou requête PTR vers un serveur éligible de la plage. Recherche du préfixe MAC dans le registre OUI embarqué. |
+| Premier vu, dernier vu | L’historique SQLite associe la MAC au réseau. Une observation sans MAC reste propre au scan courant. |
+| Ports TCP | Seulement si l’option est cochée. RUX tente une connexion aux ports 80 et 443 des hôtes observés. Un délai expiré est affiché comme indéterminé. |
 
-Le rapport décrit **le poste qui a exécuté le test**. Le code de sortie attendu est `0` et `ok` doit valoir `true`.
+Clique sur un en-tête pour trier ou saisis une IP, un nom ou une MAC pour filtrer la table. **Exporter** enregistre toutes les observations du scan courant. Le **CSV** contient une ligne de résumé et une ligne par appareil, en UTF-8 avec séparateur point-virgule. Le **JSON** conserve les paramètres du scan et les états de chaque port testé. L’interface affiche l’heure locale et les exports utilisent UTC.
 
-<h2 align="center">Installation // Lancer depuis les sources</h2>
-
-Utilise Python 3.12 **x64** pour le build de référence. Les versions 3.11 à 3.14 entrent dans la plage du projet. Les commandes suivantes s’exécutent depuis le dossier contenant `pyproject.toml`.
-
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install .
-.\.venv\Scripts\python.exe main.py
-```
-
-La seule dépendance applicative directe est `PySide6-Essentials==6.10.3`, la distribution officielle qui fournit notamment QtCore, QtGui, QtWidgets et dépend de Shiboken6. Les accès réseau reposent sur la bibliothèque standard et les API de Windows. SQLite est inclus avec CPython.
-
-<h2 align="center">Build Windows // Produire RUX.exe</h2>
-
-Depuis PowerShell, la procédure complète tient en une commande :
-
-```powershell
-.\Build-RUX.cmd
-```
-
-Le script prépare le venv, installe les dépendances, exécute les tests, construit le binaire graphique, lance son auto-test, puis calcule son SHA-256. Les sorties sont `dist\RUX.exe`, `dist\RUX.exe.sha256` et `.pyi-work\self-test.json`. Le premier build nécessite Internet pour installer les paquets Python.
-
-Pour exécuter séparément les étapes de développement :
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install ".[build]"
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\python.exe -m PyInstaller --clean --noconfirm --workpath .\.pyi-work --distpath .\dist .\build\RUX.spec
-```
-
-`RUX.spec` fixe le mode mono-fichier graphique, l’icône, les données, les notices et les propriétés Windows. PyInstaller est épinglé en version 6.22.3. Le workflow **Build RUX Windows x64**, lancé sur les changements de main, les pull requests ou manuellement, exécute le même script sur un runner Windows et conserve l’exécutable, l’empreinte et le rapport. Pour l’utiliser, place le **contenu des sources** à la racine de ton dépôt, puis utilise **Actions → Build RUX Windows x64 → Run workflow**.
-
-<h2 align="center">Architecture // Agents et interface</h2>
-
-Qt Widgets fournit la table modèle/vue et le filtrage. Le cœur fonctionne sans Qt. Le thread GUI reçoit les observations et la progression par signaux. L’orchestrateur utilise un seul pool de huit workers et lui soumet au plus huit adresses à la fois.
-
-| Agent | Rôle |
-|---|---|
-| `agents/orchestrator.py` | Consomme la confirmation à usage unique, distribue les cibles, gère annulation, erreurs et historique. |
-| `agents/discovery.py` | Constate la présence du poste local, d’une réponse ARP fraîche ou d’un Echo Reply. |
-| `agents/identification.py` | Enrichit les hôtes observés par DNS, OUI et, sur demande, TCP. |
-| `agents/report.py` | Fournit une représentation commune à la table et aux exports. |
-
-```text
-main.py                        Point d’entrée graphique et auto-test
-agents/                        orchestrator.py, discovery.py, identification.py, report.py
-skills/                        arp.py, icmp.py, tcp.py, dns.py, oui.py, exports.py, journal.py
-core/                          config.py, models.py, scope.py, windows_net.py, inventory.py
-gui/                           main_window.py, dialogs.py, worker.py, device_table.py, style.py
-data/                          oui.csv, rux.ico, NOTICE.txt, licenses/
-build/                         RUX.spec, version_info.txt, assemble_x64.py
-tests/                         Périmètre, skills, historique, exports, agents, GUI et ABI Windows
-.github/workflows/windows.yml  Build Windows manuel
-Build-RUX.cmd                  Build local et auto-test de l’exécutable
-pyproject.toml                 Version, auteur, paquets et dépendances
-```
-
-<h2 align="center">Skills // Entrées et sorties</h2>
-
-Une `Session` contient le plan confirmé, l’interface source, les cibles et le signal d’annulation. Une sonde réseau vérifie l’appartenance au périmètre et la route directe avant émission. `TargetDenied` signale une destination refusée. `StopScan` interrompt la planification. Les erreurs système restent des `OSError` que les agents consignent.
-
-| Fonction | Entrée | Résultat |
-|---|---|---|
-| `skill_arp_scan` | Session, IPv4 | MAC unicast obtenue via `ResolveIpNetEntry2` ou `None`. La résolution ARP rafraîchit le cache voisin de cette cible. |
-| `skill_icmp_ping` | Session, IPv4 | Latence en millisecondes, zéro compris, ou `None`. `IcmpSendEcho2Ex` fixe l’IPv4 source et le délai. Après un Echo Reply, une lecture passive de la table des voisins peut fournir la MAC. |
-| `skill_tcp_probe` | Session, hôte observé, port confirmé | `PortResult` avec `open`, `refused` ou `indeterminate`. Une erreur système est rapportée par l’agent. Ouverture et fermeture de connexion, sans données applicatives. |
-| `skill_dns_resolve` | Session, IPv4 observée | Nom PTR ou `None`. Lit le cache via `DnsQuery_W` avec `DNS_QUERY_NO_WIRE_QUERY`. À défaut, interroge le premier DNS de la carte situé dans les cibles confirmées. La requête UDP directe ne demande pas de récursion. |
-| `skill_oui_lookup` | MAC optionnelle, registre local | Titulaire du préfixe le plus spécifique (36, 28, puis 24 bits) ou `None`. Une MAC administrée localement reste sans fabricant présumé. |
-| `skill_export_csv` | Dictionnaire de rapport, chemin | CSV avec BOM UTF-8, séparateur point-virgule, ligne de résumé et une ligne par hôte. Renvoie le nombre d’hôtes. Les textes pouvant être interprétés comme des formules sont neutralisés. |
-| `skill_export_json` | Même entrée | Document JSON UTF-8 avec métadonnées du scan et observations. Renvoie le nombre d’hôtes. |
-| `skill_logging` | Logger, niveau, identifiant de scan, message | Événement UTC dans la vue Journal et dans le fichier tournant si le dossier utilisateur est accessible. |
-
-Les exports utilisent un fichier temporaire situé à côté de la destination puis un remplacement atomique. Une erreur d’écriture avant le remplacement conserve la version précédente.
-
-<h2 align="center">Paramètres // Réseau et stockage</h2>
-
-| Paramètre | Valeur initiale |
-|---|---|
-| Plages acceptées | `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`. La plage complète doit aussi appartenir au segment de la carte sélectionnée. |
-| Cibles | 256 adresses au maximum par scan, avec traitement des réseaux `/31` et `/32`. |
-| Concurrence | 8 opérations au maximum, toutes méthodes confondues. |
-| TCP | Désactivé. Si activé, ports 80 et 443 sur les hôtes observés. |
-| Délai | 650 ms par opération ICMP, TCP ou DNS, réglable de 100 à 3 000 ms. Windows gère le délai ARP. |
-| DNS | Activé. Cache local et serveur du segment autorisé, si disponible. |
-| Historique | `%LOCALAPPDATA%\RUX\inventory.sqlite3`, premier/dernier vu UTC par réseau et MAC. |
-| Journal | `%LOCALAPPDATA%\RUX\rux.log`, rotation à 1 Mio, trois archives. |
-
-Les constantes sont dans `core/config.py`. Le changement de plage, de carte ou d’options nécessite une nouvelle confirmation. Une route via une passerelle est exclue. Une disparition de carte ou un changement de sa configuration détecté pendant le scan interrompt le traitement. L’annulation laisse finir les appels réseau déjà engagés.
-
-Le résultat reste disponible jusqu’au prochain scan lancé ou à la fermeture de RUX. SQLite conserve les dates des MAC connues. Une IP sans MAC reste propre à son scan. Les dates de la GUI utilisent l’heure locale, les exports utilisent UTC.
-
-<h2 align="center">Exemple // Export JSON</h2>
-
-Extrait **illustratif** du tableau `devices` d’un export JSON. `ports` contient les états des ports effectivement testés.
+<details>
+<summary>Voir un exemple de ligne du tableau JSON devices</summary>
 
 ```json
 {
   "ip": "192.168.42.10",
-  "mac": "00:50:56:01:02:03",
-  "hostname": "imprimante.lab",
+  "mac": "00:50:56:00:00:0A",
+  "hostname": "poste-demo.lan",
   "vendor": "VMware, Inc.",
   "method": "ARP",
   "latency_ms": null,
   "first_seen": "2026-11-24T09:00:00.000Z",
   "last_seen": "2026-11-24T09:04:12.240Z",
-  "ports": [{"port": 80, "state": "refused"}, {"port": 443, "state": "open"}]
+  "ports": []
 }
 ```
 
-Le bloc `scan` donne notamment la plage, l’interface, le nombre d’adresses traitées et le statut `completed`, `partial`, `cancelled` ou `failed`. Un CSV sans hôte contient quand même la ligne de résumé. Pour un scan annulé pendant l’identification, certains ports demandés peuvent rester non testés.
-
-<h2 align="center">Utilisation // Autorisation et limites</h2>
-
-Utilise RUX sur ton propre LAN ou avec l’autorisation de son responsable. L’accès physique ou Wi-Fi à un réseau ne confère pas, à lui seul, cette autorisation. RUX garde le périmètre sur l’interface choisie, adresse directement ses sondes et limite leur nombre. Les résultats et les logs sont locaux.
-
-Un appareil en veille, sur un autre VLAN ou isolé par le point d’accès peut rester invisible. Un proxy ARP peut répondre pour plusieurs IP : le nombre d’IP observées ne garantit pas le nombre de machines physiques. Un refus TCP est distinct d’un délai expiré. Le nom DNS dépend des enregistrements disponibles, et le titulaire du préfixe MAC peut être un constructeur de carte réseau ou de matériel virtuel.
-
-[Nmap](https://nmap.org/book/man.html) offre un inventaire plus configurable dans les périmètres où il est autorisé. [arp-scan](https://github.com/royhills/arp-scan) est spécialisé dans la découverte IPv4 par ARP sur le lien local. Ces outils restent indépendants de RUX.
-
-<h2 align="center">Validation // Tests et plateformes</h2>
-
-Les tests applicatifs utilisent un réseau simulé pour contrôler les réponses, les délais, les refus de route, les modifications de carte et l’annulation. Les tests Qt pilotent le vrai dialogue de consentement et la vraie table. Un test conditionnel Windows charge les DLL natives et énumère passivement les interfaces.
-
-L’exécutable joint a été **assemblé hors Windows** à partir du bootloader graphique Windows x64 de PyInstaller, de CPython Windows 3.12.16 et des wheels Windows de Qt. Le format PE, les ressources de version et le contenu de l’archive interne ont été vérifiés. Sous Linux, 44 tests ont réussi, y compris les tests de la GUI réelle. Le 45e test est réservé aux DLL Windows. La recette de lancement et de découverte sur Windows 10/11 physiques ou virtualisés reste à effectuer. Le build natif standard, depuis les mêmes sources, suit `Build-RUX.cmd`.
-
-Pour une recette sur un LAN autorisé, utilise un compte standard, vérifie l’interface, annule une première fois la confirmation, puis confirme un scan sur une petite tranche contenant un appareil connu. Contrôle son IP ou sa MAC, le filtre, les exports et la colonne des ports après activation explicite. Le bouton Annuler doit conserver un résultat partiel exportable.
-
-<details>
-<summary>Reproduire l’assemblage hors Windows</summary>
-
-Cette méthode de distribution utilise les composants d’archive et le bootloader de PyInstaller. La commande `pyinstaller` standard construit pour son OS hôte. Pour l’assemblage spécifique, il faut un hôte Linux x64 avec CPython 3.12, uv, cpp et les outils GNU `x86_64-w64-mingw32-windres` et `x86_64-w64-mingw32-ld`. Utilise un dossier de travail distinct du répertoire des sources.
-
-```bash
-python3.12 -m venv .pack-venv
-.pack-venv/bin/python -m pip install PyInstaller==6.22.3 pefile==2023.2.7 lief==1.0.0
-uv python install -i "$PWD/win-runtime" cpython-3.12.16-windows-x86_64-none
-runtime="$PWD/win-runtime/cpython-3.12.16-windows-x86_64-none"
-.pack-venv/bin/python -m pip install --only-binary=:all: --platform win_amd64 --implementation cp --python-version 3.12 --abi cp312 --upgrade --target "$runtime/Lib/site-packages" PySide6-Essentials==6.10.3 PyInstaller==6.22.3 pywin32-ctypes pefile==2023.2.7
-.pack-venv/bin/python /chemin/vers/sources/build/assemble_x64.py "$runtime" dist/RUX.exe
-```
+Cet exemple correspond à un scan avec le contrôle TCP désactivé. Le document complet contient aussi `schema_version`, `application` et `scan`.
 
 </details>
 
-<h2 align="center">Références // Documentation technique</h2>
+<h2 align="center">Périmètre // Réseau et données locales</h2>
 
-- [Adresses privées IPv4, RFC 1918](https://datatracker.ietf.org/doc/html/rfc1918)
-- [Microsoft IP Helper, énumération des cartes](https://learn.microsoft.com/windows/win32/api/iphlpapi/nf-iphlpapi-getadaptersaddresses)
-- [Microsoft GetBestRoute2](https://learn.microsoft.com/windows/win32/api/netioapi/nf-netioapi-getbestroute2)
-- [Microsoft ResolveIpNetEntry2](https://learn.microsoft.com/windows/win32/api/netioapi/nf-netioapi-resolveipnetentry2)
-- [Microsoft IcmpSendEcho2Ex](https://learn.microsoft.com/windows/win32/api/icmpapi/nf-icmpapi-icmpsendecho2ex)
-- [Microsoft GetIpNetEntry2](https://learn.microsoft.com/windows/win32/api/netioapi/nf-netioapi-getipnetentry2)
-- [Microsoft, options du résolveur DNS](https://learn.microsoft.com/windows/win32/dns/dns-constants)
-- [IEEE Registration Authority](https://standards.ieee.org/products-programs/regauth/)
-- [Qt for Python](https://doc.qt.io/qtforpython-6/)
-- [PyInstaller](https://pyinstaller.org/en/stable/)
+| Réglage | Comportement |
+| :--- | :--- |
+| Adresses acceptées | Sous-réseaux de `10.0.0.0/8`, `172.16.0.0/12` ou `192.168.0.0/16` directement connectés à la carte choisie. Une route passant par une passerelle est refusée. |
+| Taille et concurrence | 256 adresses au maximum dans le CIDR, huit tâches simultanées au maximum. Les préfixes `/31` et `/32` sont pris en charge. |
+| Options initiales | DNS local activé, TCP désactivé. Délai ICMP, TCP et DNS de 650 ms, réglable de 100 à 3 000 ms. Windows gère le délai ARP. |
+| Historique et logs | `%LOCALAPPDATA%\RUX\inventory.sqlite3` et `%LOCALAPPDATA%\RUX\rux.log`. Rotation du journal à 1 Mio avec trois archives. |
+
+La veille, un pare-feu, l’isolation Wi-Fi ou la séparation en VLAN peuvent masquer des appareils. Un proxy ARP peut répondre pour plusieurs IP. La carte représente les adresses observées sur le segment. Le câblage physique et les liens entre commutateurs restent inconnus.
+
+<a id="build"></a>
+<h2 align="center">Développement // Tester et construire RUX.exe</h2>
+
+Pour utiliser la version distribuée, le téléchargement de l’exécutable suffit. Pour modifier le projet, prépare **Git** et **Python 3.12 x64** sous Windows. Le projet accepte Python 3.11 à 3.14.
+
+```powershell
+git clone https://github.com/RufusTheDwarf/Rux-NetMap.git
+cd Rux-NetMap
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install ".[build]"
+.\.venv\Scripts\python.exe main.py
+```
+
+Lance ensuite les tests seuls ou le build complet dans PowerShell.
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\Build-RUX.cmd
+```
+
+| Fichier produit | Contenu |
+| :--- | :--- |
+| `dist\RUX.exe` | Application x64 autonome empaquetée par PyInstaller. |
+| `dist\RUX.exe.sha256` | Empreinte du binaire généré. |
+| `.pyi-work\self-test.json` | Rapport de démarrage du binaire, versions Qt et Python, interfaces et registre OUI. |
+
+Le [workflow Windows](.github/workflows/windows.yml) exécute le même build dans GitHub Actions. Il lance l’interface empaquetée, vérifie la ressource de version Windows et conserve les résultats dans l’artefact **RUX-Windows-x64**. Le code de la version 1.1.0 a passé 47 tests sur Windows Server 2022 x64. Les tests de découverte utilisent un réseau simulé et le test Windows énumère les interfaces du runner.
+
+<details>
+<summary>Vérifier le fichier téléchargé ou lancer son auto-test</summary>
+
+Télécharge `RUX.exe` et `RUX.exe.sha256` de la même release dans un dossier où ton compte peut écrire. Ouvre PowerShell dans ce dossier.
+
+```powershell
+$attendu = ((Get-Content .\RUX.exe.sha256 -Raw).Trim() -split '\s+')[0]
+(Get-FileHash .\RUX.exe -Algorithm SHA256).Hash -eq $attendu
+(Get-Item .\RUX.exe).VersionInfo | Select-Object CompanyName, ProductVersion
+$p = Start-Process .\RUX.exe -ArgumentList '--self-test','rux-verification.json' -Wait -PassThru
+$p.ExitCode
+Get-Content .\rux-verification.json
+```
+
+La comparaison doit afficher `True`, l’auteur indiqué est **Onlyrutsuu**, et l’auto-test doit finir avec le code `0` et `"ok": true`. Le binaire publié est distribué sans certificat Authenticode.
+
+</details>
+
+<h2 align="center">Architecture // Du scan à la carte</h2>
+
+Les quatre agents sont des modules Python locaux. PySide6 fournit les vues et les signaux entre le moteur et l’interface. PyInstaller regroupe le programme, Qt et le registre OUI dans un exécutable.
+
+```mermaid
+flowchart TD
+  A["Périmètre confirmé dans la GUI"] --> B["Agent Orchestrateur"]
+  B --> C["Agent Découverte"]
+  C -->|Hôte observé| D["Agent Identification"]
+  D --> E["Observation enrichie"]
+  E --> F["Historique SQLite"]
+  E --> G["Table et carte"]
+  E --> H["Agent Rapport"]
+  H --> I["CSV ou JSON"]
+```
+
+| Dossier | Rôle |
+| :--- | :--- |
+| [agents/](agents/) · [skills/](skills/) | Cycle de scan, découverte, enrichissement, exports et journalisation. |
+| [core/](core/) | Périmètre et consentement, appels Windows, modèles, configuration et historique. |
+| [gui/](gui/) | Inventaire, carte IPv4, confirmation, journal et écran À propos. |
+| [data/](data/) · [build/](build/) | Registre OUI et notices, icône, configuration PyInstaller et métadonnées Windows. |
+| [tests/](tests/) | Tests des agents, des skills, de l’interface, du stockage et des API Windows. |
+
+Les entrées, sorties et erreurs de chaque skill sont documentées dans la [référence technique](docs/TECHNIQUE.md).
+
+<a id="depannage"></a>
+<h2 align="center">Dépannage // Les cas courants</h2>
+
+| Ce que tu vois | Quoi vérifier |
+| :--- | :--- |
+| Du Python ou un ZIP « Source code » | Ouvre [la dernière release](https://github.com/RufusTheDwarf/Rux-NetMap/releases/latest), déplie **Assets** et choisis **RUX.exe**. |
+| « Aucune interface IPv4 privée active » | Connecte la carte Ethernet ou Wi-Fi voulue, vérifie son IPv4 avec `ipconfig` et clique sur **Actualiser**. |
+| Une plage refusée | Utilise l’adresse réseau exacte du CIDR, sur le segment de l’interface. Pour un grand LAN, choisis un `/24` ou une tranche plus petite. |
+| Peu d’appareils ou des fabricants inconnus | Consulte **Journal**. Un hôte peut être en veille ou isolé. Une MAC aléatoire ou un préfixe inconnu peut laisser le fabricant vide. |
+| Un scan annulé ou partiel | Le journal précise la cause. Les appareils déjà observés restent consultables dans la carte et exportables. |
+
+Pour d’autres besoins d’inventaire sur un réseau autorisé, [Nmap](https://nmap.org/book/man.html) propose davantage de méthodes et [arp-scan](https://github.com/royhills/arp-scan) se concentre sur la découverte ARP locale.
+
+<h2 align="center">Crédits // Code et dépendances</h2>
+
+**Onlyrutsuu** est l’auteur de RUX. Le code du projet est distribué sous [licence MIT](LICENSE). Les conditions du registre OUI et des composants embarqués figurent dans les [notices des tiers](data/NOTICE.txt).
+
+<p align="center"><img src="docs/images/footer.svg" width="100%" alt="RUX NetMap par Onlyrutsuu" /></p>
