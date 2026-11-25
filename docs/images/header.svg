@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 132" role="img" aria-labelledby="title description">
+  <title id="title">RUX NetMap</title>
+  <desc id="description">Inventaire IPv4 local pour Windows, illustré par une grille d’adresses.</desc>
+  <defs>
+    <pattern id="grid" x="0" y="0" width="27" height="27" patternUnits="userSpaceOnUse">
+      <rect x="3" y="3" width="21" height="21" rx="4" fill="#223f4e"/>
+    </pattern>
+    <style>
+      @media (prefers-reduced-motion: no-preference) {
+        .scan { animation: pulse 6s ease-in-out infinite alternate; }
+        @keyframes pulse { from { opacity: .58; } to { opacity: 1; } }
+      }
+    </style>
+  </defs>
+  <rect width="960" height="132" rx="14" fill="#142b3a"/>
+  <rect x="28" y="30" width="4" height="72" rx="2" fill="#62d7b6"/>
+  <text x="50" y="67" fill="#f4fafb" font-family="Segoe UI, Arial, sans-serif" font-size="45" font-weight="700">RUX NetMap</text>
+  <text x="52" y="96" fill="#b6d7d7" font-family="Segoe UI, Arial, sans-serif" font-size="18">Inventaire IPv4 du réseau local</text>
+  <g transform="translate(718 12)">
+    <rect width="216" height="108" fill="url(#grid)"/>
+    <g fill="#65cbb1" class="scan">
+      <rect x="30" y="3" width="21" height="21" rx="4"/><rect x="111" y="30" width="21" height="21" rx="4"/>
+      <rect x="57" y="57" width="21" height="21" rx="4"/><rect x="165" y="84" width="21" height="21" rx="4"/>
+    </g>
+  </g>
+</svg>
