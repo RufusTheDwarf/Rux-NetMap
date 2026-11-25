@@ -7,6 +7,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from core.models import Device
+
 if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 try:
@@ -79,6 +81,44 @@ class GuiTests(unittest.TestCase):
         self.assertTrue(w.export_btn.isEnabled())
         self.assertTrue(w.scan_btn.isEnabled())
         self.assertIn("Scan confirmé", w.log_text.toPlainText())
+        # Open an observed address hidden by the existing table filter.
+        self.assertEqual(w.network_map.grid.count(), 14)
+        self.assertEqual(set(w.network_map.observed), {IP("192.168.42.2"), IP("192.168.42.10")})
+        calls = list(self.backend.calls)
+        w.nav_group.button(1).click()
+        w.network_map.grid.setCurrentItem(w.network_map.cells[IP("192.168.42.2")])
+        w.network_map.open_button.click()
+        self.assertEqual(w.pages.currentIndex(), 0)
+        self.assertEqual(w.table.currentIndex().data(), "192.168.42.2")
+        self.assertEqual(self.backend.calls, calls)
+
+    def test_map_reset_and_observations_for_small_subnets(self):
+        m = self.window.network_map
+        m.set_plan(make_session("192.168.42.10/31").plan)
+        self.assertEqual([str(ip) for ip in m.cells], ["192.168.42.10", "192.168.42.11"])
+        ip = IP("192.168.42.10")
+        m.grid.setCurrentItem(m.cells[ip])
+        self.assertFalse(m.open_button.isEnabled())
+        device = Device(ip, None, "ICMP", "2026-11-24T09:00:00Z", "2026-11-24T09:00:00Z",
+                        hostname="poste-test")
+        m.observe(device)
+        self.assertTrue(m.open_button.isEnabled())
+        self.assertIn("poste-test", m.details.text())
+        self.assertIn("observé", m.cells[ip].data(Qt.ItemDataRole.AccessibleTextRole))
+        m.set_plan(make_session("192.168.42.20/32").plan)
+        m.observe(device)
+        self.assertEqual(set(m.cells), {IP("192.168.42.20")})
+        self.assertEqual(m.observed, {})
+        self.assertFalse(m.open_button.isEnabled())
+        self.assertNotIn("poste-test", m.details.text())
+
+    def test_cancelled_confirmation_preserves_map(self):
+        w = self.window
+        w.network_map.set_plan(make_session("192.168.42.2/32").plan)
+        with patch.object(ConfirmDialog, "exec", return_value=QDialog.DialogCode.Rejected):
+            w.start_scan()
+        self.assertEqual(set(w.network_map.cells), {IP("192.168.42.2")})
+        self.assertFalse(self.backend.calls)
 
     def test_multiple_interfaces_require_choice(self):
         from dataclasses import replace
