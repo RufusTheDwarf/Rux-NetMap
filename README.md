@@ -1,6 +1,8 @@
-# Rux-Terminal
+# Rux-NetMap
 
-**RUX · Inventaire du réseau local pour Windows x64 · version 1.0.0 · Onlyrutsuu**
+**RUX · Inventaire du réseau local pour Windows x64 · version 1.1.0 · Onlyrutsuu**
+
+**[Télécharger RUX.exe pour Windows x64](https://github.com/RufusTheDwarf/Rux-NetMap/releases/latest/download/RUX.exe)** · [Empreinte SHA-256](https://github.com/RufusTheDwarf/Rux-NetMap/releases/latest/download/RUX.exe.sha256) · [Toutes les versions](https://github.com/RufusTheDwarf/Rux-NetMap/releases)
 
 Le dépôt utilise la [licence MIT](LICENSE). Les attributions des composants tiers figurent dans [data/NOTICE.txt](data/NOTICE.txt).
 
@@ -8,12 +10,13 @@ RUX affiche les appareils observés sur un segment IPv4 privé. Il est conçu po
 
 <h2 align="center">Démarrage // Utiliser RUX.exe</h2>
 
-1. Extrais l’archive dans un dossier où ton compte peut écrire. Ouvre **RUX.exe**.
+1. Télécharge **RUX.exe** avec le lien ci-dessus et ouvre-le. Tu peux aussi le trouver dans **Releases**, puis **Assets** sur GitHub.
 2. Choisis la carte reliée au LAN. Sur un poste avec Wi-Fi, Ethernet et VMware, vérifie le nom de la carte et son IPv4. Le préfixe réel apparaît à côté de l’adresse.
 3. Vérifie la plage proposée. Sur `10.30.45.6/16`, par exemple, RUX propose `10.30.45.0/24`. Tu peux choisir une autre tranche de ce LAN. Un `/24` représente 256 adresses et, sur un réseau classique, 254 cibles hôtes.
 4. Laisse les options par défaut pour commencer. Clique sur **Lancer le scan**, relis le récapitulatif, coche l’autorisation et confirme. Tu peux annuler à tout moment.
 5. Clique sur les en-têtes pour trier. Le champ de recherche filtre toutes les colonnes. **Exporter** enregistre l’inventaire entier du scan affiché. Le filtre visuel reste indépendant de l’export.
-6. Ouvre **Journal** pour consulter les erreurs, les permissions manquantes et les résultats partiels.
+6. Ouvre **Carte du réseau** pour voir les adresses de la plage confirmée. Chaque case montre le dernier nombre de l’IPv4. Un point plein signale un appareil observé. Sélectionne sa case puis **Voir dans l’inventaire** pour retrouver sa ligne, même si un filtre la masquait. Une case sans observation peut correspondre à une adresse encore en attente ou à un appareil silencieux.
+7. Ouvre **Journal** pour consulter les erreurs, les permissions manquantes et les résultats partiels.
 
 L’exécutable embarque Python, Qt et le registre OUI. Un scan nécessite une carte Ethernet, Wi-Fi ou un agrégat Ethernet actif avec une IPv4 RFC 1918. Cible de recette : Windows 10 22H2 et Windows 11 x64.
 
@@ -70,7 +73,7 @@ Pour exécuter séparément les étapes de développement :
 .\.venv\Scripts\python.exe -m PyInstaller --clean --noconfirm --workpath .\.pyi-work --distpath .\dist .\build\RUX.spec
 ```
 
-`RUX.spec` fixe le mode mono-fichier graphique, l’icône, les données, les notices et les propriétés Windows. PyInstaller est épinglé en version 6.22.3. Le workflow **Build RUX Windows x64**, lancé sur les changements de main, les pull requests ou manuellement, exécute le même script sur un runner Windows et conserve l’exécutable, l’empreinte et le rapport. Pour l’utiliser, place le **contenu des sources** à la racine de ton dépôt, puis utilise **Actions → Build RUX Windows x64 → Run workflow**.
+`RUX.spec` fixe le mode mono-fichier graphique, l’icône, les données, les notices et les propriétés Windows. PyInstaller est épinglé en version 6.22.3. Le workflow **Build RUX Windows x64**, lancé sur les changements de main, les pull requests ou manuellement, exécute le même script sur un runner Windows et conserve l’exécutable, l’empreinte et le rapport. Pour relancer la compilation, ouvre **Actions → Build RUX Windows x64 → Run workflow**. Le résultat de chaque build se trouve dans **Artifacts → RUX-Windows-x64**. La version distribuée se télécharge directement depuis **Releases**.
 
 <h2 align="center">Architecture // Agents et interface</h2>
 
@@ -88,11 +91,11 @@ main.py                        Point d’entrée graphique et auto-test
 agents/                        orchestrator.py, discovery.py, identification.py, report.py
 skills/                        arp.py, icmp.py, tcp.py, dns.py, oui.py, exports.py, journal.py
 core/                          config.py, models.py, scope.py, windows_net.py, inventory.py
-gui/                           main_window.py, dialogs.py, worker.py, device_table.py, style.py
+gui/                           main_window.py, network_map.py, dialogs.py, worker.py, device_table.py, style.py
 data/                          oui.csv, rux.ico, NOTICE.txt, licenses/
 build/                         RUX.spec, version_info.txt, assemble_x64.py
 tests/                         Périmètre, skills, historique, exports, agents, GUI et ABI Windows
-.github/workflows/windows.yml  Build Windows manuel
+.github/workflows/windows.yml  Build et tests Windows
 Build-RUX.cmd                  Build local et auto-test de l’exécutable
 pyproject.toml                 Version, auteur, paquets et dépendances
 ```
@@ -163,7 +166,7 @@ Un appareil en veille, sur un autre VLAN ou isolé par le point d’accès peut 
 
 Les tests applicatifs utilisent un réseau simulé pour contrôler les réponses, les délais, les refus de route, les modifications de carte et l’annulation. Les tests Qt pilotent le vrai dialogue de consentement et la vraie table. Un test conditionnel Windows charge les DLL natives et énumère passivement les interfaces.
 
-L’exécutable joint a été **assemblé hors Windows** à partir du bootloader graphique Windows x64 de PyInstaller, de CPython Windows 3.12.16 et des wheels Windows de Qt. Le format PE, les ressources de version et le contenu de l’archive interne ont été vérifiés. Sous Linux, 44 tests ont réussi, y compris les tests de la GUI réelle. Le 45e test est réservé aux DLL Windows. La recette de lancement et de découverte sur Windows 10/11 physiques ou virtualisés reste à effectuer. Le build natif standard, depuis les mêmes sources, suit `Build-RUX.cmd`.
+Le binaire de distribution est construit sur Windows Server 2022 x64. GitHub Actions exécute la suite de tests, ouvre la fenêtre depuis l’exécutable empaqueté, vérifie le registre OUI, SQLite et les API réseau Windows, puis calcule l’empreinte du fichier. Les tests de découverte utilisent des appareils simulés. Le contrôle d’un LAN réel sous Windows 10/11 se fait sur un réseau autorisé.
 
 Pour une recette sur un LAN autorisé, utilise un compte standard, vérifie l’interface, annule une première fois la confirmation, puis confirme un scan sur une petite tranche contenant un appareil connu. Contrôle son IP ou sa MAC, le filtre, les exports et la colonne des ports après activation explicite. Le bouton Annuler doit conserver un résultat partiel exportable.
 
